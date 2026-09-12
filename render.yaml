@@ -3,6 +3,7 @@ services:
     name: timesheet-management-system
     runtime: python
     plan: free
+    region: singapore
     buildCommand: ./build.sh
     startCommand: gunicorn timesheet_project.wsgi:application
     envVars:
@@ -20,3 +21,4 @@ services:
 databases:
   - name: timesheet-db
     plan: free
+    region: singapore
