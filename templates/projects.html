@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="background-color: rgb(29, 34, 63);"><h1 style="color: white;">Projects</h1></div>
+
+<!-- Projects Table -->
+<table class="projects-table" border="1">
+    <thead>
+        <tr>
+            <th>Project Name</th>
+            <th>Customer</th>
+            <th>Plant</th>
+            <th>Role</th>
+            <th>Project Type</th>
+            <th>Product Type</th>
+            <th>Program Manager</th>
+            <th>Project Manager</th>
+            <th>Secondary Approver</th>
+            <th>Start Date</th>
+            <th>Completion Date</th>
+            <th>Project Key</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody id="projectsBody">
+        <!-- Display Project objects in the table -->
+        {% for project in projects %}
+        <tr>
+            <td>{{ project.name }}</td>
+            <td>{{ project.customer }}</td>
+            <td>{{ project.plant_name }} ({{ project.plant_code }})</td>
+            <td>
+                {% if project.program_manager == user %}
+                    Program Manager
+                {% elif project.project_manager == user %}
+                    Project Manager
+                {% elif project.solution_architect == user %}
+                    Solution Architect
+                {% elif project.solution_architect_1 == user %}
+                    Solution Architect 1
+                {% elif project.solution_architect_2 == user %}
+                    Solution Architect 2
+                {% elif project.functional_consultant == user %}
+                    Functional Consultant
+                {% elif project.functional_consultant_1 == user %}
+                    Functional Consultant
+                {% elif project.functional_consultant_2 == user %}
+                    Functional Consultant
+                {% elif project.functional_consultant_3 == user %}
+                    Funnctional Consultant
+                {% elif project.technical_consultant == user %}
+                    Technical Consultant
+                {% elif project.technical_consultant_1 == user %}
+                    Technical Consultant
+                {% elif project.technical_consultant_2 == user %}
+                    Technical Consultant
+                {% elif project.technical_consultant_3 == user %}
+                    Technical Consultant
+                {% elif project.secondary_approver == user %}
+                    Secondary Approver
+                {% else %}
+                    Role not defined
+                {% endif %}
+            </td>
+            <td>{{ project.project_type }}</td>
+            <td>{{ project.product_type }}</td>
+            <td>{{ project.program_manager }}</td>
+            <td>{{ project.project_manager }}</td>
+            <td>{{ project.secondary_approver }}</td>
+            <td>{{ project.start_date }}</td>
+            <td>{{ project.completion_date }}</td>
+            <td>{{ project.project_key }}</td>
+            <td>{{ project.get_status_display }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Add CSS styles for the table, if needed -->
+<style>
+    .projects-table {
+        width: 100%;
+        border-collapse: collapse;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .projects-table th,
+    .projects-table td {
+        padding: 8px;
+        text-align: center;
+    }
+
+    .projects-table th {
+        background-color: rgb(29, 34, 63);
+        color: white;
+    }
+
+    .projects-table td {
+        background-color: #f2f2f2;
+    }
+</style>
+</div>  <!-- Close the "content" div -->
+{% endblock %}

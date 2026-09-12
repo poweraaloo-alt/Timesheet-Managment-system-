@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="background-color: rgb(29, 34, 63);"><h1 style="color: white;">Add Timesheet Entry</h1></div>
+
+<div id="timesheetEntryFormContainer">
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit</button>
+    </form>
+</div>
+
+{% endblock %}

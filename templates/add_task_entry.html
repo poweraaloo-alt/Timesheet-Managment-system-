@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Activity Entry</title>
+</head>
+<body>
+    <h1>Add Activity Entry</h1>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <label for="activity_id">Activity ID:</label>
+        <input type="text" id="activity_id" name="activity_id" required>
+        
+        <br>
+        
+        <label for="hours_worked">Hours Worked:</label>
+        <input type="number" id="hours_worked" name="hours_worked" required>
+        
+        <br>
+        
+        <!-- Add more form fields as needed -->
+        
+        <button type="submit">Submit</button>
+    </form>
+    
+    <!-- Add any additional content or formatting as needed -->
+</body>
+</html>

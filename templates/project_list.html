@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="background-color: rgb(29, 34, 63);"><h1 style="color: white;">Projects</h1></div>
+
+<!-- Project Table -->
+<table class="project-table" border="1">
+    <thead>
+        <tr>
+            <th>Project Name</th>
+            <th>Your Role</th>
+            <th>Customer</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Project Manager</th>
+            <th>Program Manager</th>
+            <th>Secondary Approver</th>
+            <th>Project Type</th>
+            <th>Product Type</th>
+            <th>Project Key</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Loop through the projects and display project information -->
+        {% for project in user.projects.all %}
+        <tr>
+            <td>{{ project.name }}</td>
+            <td>{{ project.user_role }}</td>
+            <td>{{ project.customer }}</td>
+            <td>{{ project.start_date }}</td>
+            <td>{{ project.end_date }}</td>
+            <td>{{ project.project_manager }}</td>
+            <td>{{ project.program_manager }}</td>
+            <td>{{ project.secondary_approver }}</td>
+            <td>{{ project.project_type }}</td>
+            <td>{{ project.product_type }}</td>
+            <td>{{ project.project_key }}</td>
+            <td>{{ project.status }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Add CSS styles for the table, if needed -->
+<style>
+    .project-table {
+        width: 100%;
+        border-collapse: collapse;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .project-table th,
+    .project-table td {
+        padding: 8px;
+        text-align: center;
+    }
+
+    .project-table th {
+        background-color: rgb(29, 34, 63);
+        color: white;
+    }
+
+    .project-table td {
+        background-color: #f2f2f2;
+    }
+</style>
+</div>  <!-- Close the "content" div -->
+{% endblock %}

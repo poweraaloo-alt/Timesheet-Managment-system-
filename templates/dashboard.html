@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="container" style="margin-top: 2.5%;">
+    <h1>Dashboard</h1>
+    <p>Welcome back, {{ user.name }}</p>
+
+    <div class="row" style="margin-right: 1.5%; margin-top: 3%;">
+        <div id="Recent" style="border-color: #bdbdbd; margin-left: 1.5%; border-radius: 30px;">
+            <a href="www.google.com" style="text-decoration: none; "><div class="d-flex align-items-center" style="font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;font-weight: bold;"> <!-- Use flex to align text and image horizontally -->
+                <p href="" style="color: rgb(46, 46, 46);width: 95%; margin: 0%;">View Recent Timesheets</p>
+                <img style="height: 50px; justify-content: end;" src="{% static 'right-arrow.png' %}">
+            </div></a>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card" style="border-radius:30px;">
+                <div class="card-body">
+                    <h5 class="card-title">Approved Timesheets</h5>
+                    <p class="card-text">{{ approved_timesheets }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card" style="border-radius:30px;">
+                <div class="card-body">
+                    <h5 class="card-title">Pending Approval Timesheets</h5>
+                    <p class="card-text">{{ pending_approval_timesheets }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card" style="border-radius:30px;">
+                <div class="card-body">
+                    <h5 class="card-title">Rejected Timesheets</h5>
+                    <p class="card-text">{{ rejected_timesheets }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <!-- Center the pie chart in a box -->
+            <div style="display: flex; justify-content: center;">
+                <div style="border: 1px solid #bdbdbd; border-radius: 10px; padding: 10px;">
+                    <canvas id="timesheetChart" width="300" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Dummy data for the pie chart (replace with actual data)
+    var timesheetData = {
+        labels: ['Approved', 'Pending Approval', 'Rejected'],
+        datasets: [{
+            data: [
+                {{ approved_timesheets }}, // Make this sector pop out
+                {{ pending_approval_timesheets }},
+                {{ rejected_timesheets }},
+            ],
+            backgroundColor: ['#FF5733', '#36A2EB', '#FFC300'],
+            hoverOffset: 8, // Add a hover offset to make the "Approved" sector pop out
+        }],
+    };
+
+    // Get the canvas element for the chart
+    var timesheetChart = document.getElementById('timesheetChart').getContext('2d');
+
+    // Create the pie chart with styling options
+    var myPieChart = new Chart(timesheetChart, {
+        type: 'pie',
+        data: timesheetData,
+        options: {
+            responsive: false, // Disable responsiveness to set fixed width and height
+            maintainAspectRatio: false, // Disable aspect ratio
+            legend: {
+                display: true, // Show legend
+                position: 'bottom', // Position the legend at the bottom
+            },
+        },
+    });
+</script>
+{% endblock %}

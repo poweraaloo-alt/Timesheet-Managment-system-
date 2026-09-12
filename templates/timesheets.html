@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="filters-container">
+    <form id="filtersForm" method="GET" action="{% url 'timesheets' %}">
+        <!-- Date range filter -->
+        <label for="dateRange">Date Range:</label>
+        <input type="date" id="startDate" name="start_date">
+        <input type="date" id="endDate" name="end_date">
+    
+        <!-- Project filter -->
+        <label for="project">Project:</label>
+        <select name="project" id="project">
+            <option value="">All Projects</option>
+            <!-- Iterate over projects -->
+            {% for project in projects %}
+            <option value="{{ project.id }}">{{ project.name }}</option>
+            {% endfor %}
+        </select>
+    
+        <!-- Customer filter -->
+        <label for="customer">Customer:</label>
+        <select name="customer" id="customer">
+            <option value="">All Customers</option>
+            <!-- Iterate over customers -->
+            {% for customer in customers %}
+            <option value="{{ customer.id }}">{{ customer.name }}</option>
+            {% endfor %}
+        </select>
+    
+        <!-- Plant filter -->
+        <label for="plant">Plant:</label>
+        <select name="plant" id="plant">
+            <option value="">All Plants</option>
+            <!-- Iterate over plants -->
+            {% for plant in plants %}
+            <option value="{{ plant.id }}">{{ plant.name }}</option>
+            {% endfor %}
+        </select>
+    
+        <!-- Activity filter -->
+        <label for="activity">Activity:</label>
+        <select name="activity" id="activity">
+            <option value="">All Activities</option>
+            <!-- Iterate over activities -->
+            {% for activity in activities %}
+            <option value="{{ activity.name }}">{{ activity.name }}</option>
+            {% endfor %}
+        </select>
+    
+        <!-- Status filter -->
+        <label for="status">Status:</label>
+        <select name="status" id="status">
+            <option value="">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <!-- Add more status options if needed -->
+        </select>
+    
+        <!-- Apply filter button -->
+        <button type="submit" class="submit-button">Apply Filters</button>
+    </form>
+</div>
+<div class="table-container">
+    <table class="timesheet-table" border="1">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Customer</th>
+                <th>Plant</th>
+                <th>Project</th>
+                <th>Solution Module</th>
+                <th>Activity</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Total Time</th>
+                <th>Remarks</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="timesheetBody">
+            <!-- Display Timesheet objects in the table -->
+            {% for timesheet in timesheets %}
+            <tr>
+                <td>{{ timesheet.date }}</td>
+                <td>{{ timesheet.customer }}</td>
+                <td>{{ timesheet.plant }}</td>
+                <td>{{ timesheet.project }}</td>
+                <td>{{ timesheet.solution_module }}</td>
+                <td>{{ timesheet.activity }}</td>
+                <td>{{ timesheet.start_time }}</td>
+                <td>{{ timesheet.end_time }}</td>
+                <td>
+                    {% with total_time=timesheet.calculate_total_time %}
+                    {{ total_time|default:"N/A" }}
+                    {% endwith %}
+                </td>
+                <td>{{ timesheet.remarks }}</td>
+                <td>{{ timesheet.status }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Pagination controls -->
+    <button id="addTimesheetEntryBtn" class="add-button">Add Timesheet Entry</button>
+    <div class="pagination-controls">
+        <button id="prevPageBtn" class="pagination-btn" disabled>&lt; Previous</button>
+        <button id="nextPageBtn" class="pagination-btn">Next &gt;</button>
+    </div>
+</div>
+<div id="timesheetFormContainer" class="timesheet-form" style="display: none;">
+    <form id="timesheetForm" method="POST">
+        {% csrf_token %}
+        {{ timesheet_form.as_p }}
+        <button type="submit" class="submit-button">Submit Timesheet Entry</button>
+    </form>
+</div>
+
+<!-- JavaScript code -->
+<script type="text/javascript">
+    const table = document.querySelector('.timesheet-table');
+    const rowsPerPage = 12;
+    let currentPage = 0;
+
+    // Function to display the specified page of rows
+    function displayPage(page) {
+        const rows = table.querySelectorAll('tbody tr');
+        const startIndex = page * rowsPerPage;
+        const endIndex = startIndex + rowsPerPage;
+
+        rows.forEach((row, index) => {
+            if (index >= startIndex && index < endIndex) {
+                row.style.display = 'table-row';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    // Function to handle "Next" button click
+    function nextPage() {
+        currentPage++;
+        displayPage(currentPage);
+        updatePaginationButtons();
+    }
+
+    // Function to handle "Previous" button click
+    function prevPage() {
+        currentPage--;
+        displayPage(currentPage);
+        updatePaginationButtons();
+    }
+
+    // Function to update the state of pagination buttons
+    function updatePaginationButtons() {
+        const prevPageBtn = document.getElementById('prevPageBtn');
+        const nextPageBtn = document.getElementById('nextPageBtn');
+
+        prevPageBtn.disabled = currentPage === 0;
+        nextPageBtn.disabled = (currentPage + 1) * rowsPerPage >= table.rows.length;
+    }
+
+    // Add event listeners for pagination buttons
+    document.getElementById('prevPageBtn').addEventListener('click', prevPage);
+    document.getElementById('nextPageBtn').addEventListener('click', nextPage);
+
+    // Initial display
+    displayPage(currentPage);
+    updatePaginationButtons();
+
+    function openTimesheetForm() {
+        const timesheetFormContainer = document.getElementById('timesheetFormContainer');
+        timesheetFormContainer.style.display = 'block';
+    }
+
+    // Add event listener for the "Add Timesheet Entry" button to open the TimesheetForm
+    document.getElementById('addTimesheetEntryBtn').addEventListener('click', openTimesheetForm);
+
+    // Function to handle form submission for filtering
+    document.getElementById('filtersForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        const formData = new FormData(this); // Capture form data
+
+        // Construct query string with filter parameters
+        let queryParams = new URLSearchParams(formData).toString();
+
+        // Get the current URL and append filter parameters
+        const baseUrl = window.location.href.split('?')[0]; // Get the base URL
+        const url = `${baseUrl}?${queryParams}`;
+
+        // Redirect to the constructed URL for filtering
+        window.location.href = url;
+    });
+</script>
+
+<!-- Add CSS styles for the table and pagination -->
+<style>
+    .table-container {
+        max-height: auto; /* Adjust the maximum height as needed */
+        /* Disable vertical scrolling */
+        display: flex;
+        flex-direction: column;
+    }
+
+    .timesheet-table {
+        flex: 1; /* Allow the table to grow and take available space */
+        width: 100%;
+        border-collapse: collapse;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .timesheet-table th,
+    .timesheet-table td {
+        padding: 8px;
+        text-align: center;
+    }
+
+    .timesheet-table th {
+        background-color: #1d223f;
+        color: white;
+    }
+
+    .timesheet-table td {
+        background-color: #f2f2f2;
+    }
+
+    .pagination-controls {
+        text-align: right; /* Align the pagination to the right */
+        margin-top: 10px;
+    }
+
+    .pagination-btn {
+        background-color: #1d223f;
+        color: rgb(255, 255, 255); /* Set the text color to black */
+        font-weight: bold; /* Make the text bold */
+        border: 2px solid #007bff; /* Add a 2px solid border */
+        padding: 10px 20px;
+        border-radius: 25px;
+        border-color: black;
+        cursor: pointer;
+        margin: 5px;
+        transition: box-shadow 0.3s ease, transform 0.3s ease;
+    }
+
+    .pagination-btn:hover {
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); /* Add a raised shadow on hover */
+        transform: translateY(-2px); /* Move the button slightly up on hover */
+        border: 1px solid #007bff; /* Add a slight border on hover */
+    }
+
+    /* Style the disabled button */
+    .pagination-btn:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+        color: black;
+    }
+    .add-button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        float: right; /* Align to the right */
+        margin: 5px;
+        transition: box-shadow 0.3s ease, transform 0.3s ease;
+    }
+
+    .add-button:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transform: translateY(-2px);
+    }
+</style>
+</div>
+{% endblock %}

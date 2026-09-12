@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="table-container">
+    <h2>Timesheet Approvals</h2>
+    <!-- Add a project dropdown menu -->
+    <label for="project-select">Select Project:</label>
+    <select id="project-select">
+        <option value="">All Projects</option>
+        {% for project in user_projects %}
+        <option value="{{ project.name }}">{{ project.name }}</option>
+        {% endfor %}
+    </select>
+    
+    <table class="timesheet-table" border="1">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>User</th>
+                <th>Customer</th>
+                <th>Activity</th>
+                <th>Activity Description</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Total Time</th>
+                <th>Remark</th>
+                <th>Status</th>
+                <th>Update</th> <!-- Add a new column for the update button -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for project, timesheets in timesheets_by_project.items %}
+            <tr class="project-row" data-project="{{ project.name }}">
+                <td colspan="100%"><strong>{{ project.name }}</strong></td>
+            </tr>
+            {% for timesheet in timesheets %}
+            <tr class="timesheet-row" data-project="{{ project.name }}" data-timesheet-id="{{ timesheet.id }}">
+                <td>{{ timesheet.user }}</td>
+                <td>{{ timesheet.date }}</td>
+                <td>{{ project.customer }}</td>
+                <td>{{ timesheet.activity }}</td>
+                <td>{{ timesheet.activity.description }}</td><!-- Access the activity description -->
+                <td>{{ timesheet.start_time }}</td>
+                <td>{{ timesheet.end_time }}</td>
+                <td>
+                    {% with total_time=timesheet.calculate_total_time %}
+                    {{ total_time|default:"N/A" }}
+                    {% endwith %}
+                </td>
+                <td class="remark-column">{{ timesheet.remarks }}</td><!-- Add a class for the Remark column -->
+                <td>{{ timesheet.status }}</td>
+                <td>
+                    <select class="status-dropdown">
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </td>
+                <td>
+                    <button class="update-status-button">Update</button>
+                </td>
+            {% empty %}
+            <tr class="no-timesheets-row" data-project="{{ project.name }}">
+                <td colspan="100%">No timesheets for this project.</td>
+            </tr>
+            {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<!-- Add CSS styles for the table and dropdown -->
+<style>
+    /* Your existing CSS styles */
+    .table-container {
+        max-height: auto; /* Adjust the maximum height as needed */
+        /* Disable vertical scrolling */
+        overflow: auto;
+    }
+
+    .timesheet-table {
+        width: 100%;
+        border-collapse: collapse;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 20px;
+    }
+
+    .timesheet-table th,
+    .timesheet-table td {
+        padding: 8px;
+        text-align: center;
+    }
+
+    .timesheet-table th {
+        background-color: #007bff; /* Header background color */
+        color: white;
+    }
+
+    .timesheet-table td {
+        background-color: #f2f2f2; /* Row background color */
+    }
+
+    /* Style for the "No timesheets" message */
+    .no-timesheets {
+        text-align: center;
+        color: #999;
+    }
+
+    /* Style for the project dropdown */
+    #project-select {
+        margin: 10px 0;
+        padding: 5px;
+    }
+
+    /* Style for the Remark column */
+    .remark-column {
+        background-color: transparent; /* Set the background color to transparent */
+    }
+
+    /* Style for the Status column */
+    .status-select {
+        width: 100%;
+    }
+</style>
+
+<!-- JavaScript to handle filtering and status updates -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const projectSelect = document.getElementById("project-select");
+        const rows = document.querySelectorAll(".timesheet-row");
+        
+        // Add event listeners to update buttons
+        const updateButtons = document.querySelectorAll(".update-status-button");
+        updateButtons.forEach((button) => {
+            button.addEventListener("click", function () {
+                const timesheetId = button.closest(".timesheet-row").getAttribute("data-timesheet-id");
+                const statusDropdown = button.parentElement.previousElementSibling.querySelector(".status-dropdown");
+                const selectedStatus = statusDropdown.value;
+                
+                // Send the status update to the server (you will need to implement this)
+                // Example: You can use JavaScript fetch API to send a POST request to update the status.
+                // Replace 'updateStatusUrl' with your actual URL for updating the status.
+                fetch('/update_status/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': csrfToken, // You need to include the CSRF token here
+                },
+                body: `timesheet_id=${timesheetId}&new_status=${selectedStatus}`,
+            })
+            .then((response) => {
+                if (response.ok) {
+                    // Status updated successfully, you can handle this as needed
+                    console.log('Status updated successfully');
+                } else {
+                    // Handle error response
+                    console.error('Failed to update status');
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+                        });
+                    });
+                });
+</script>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Activity List{% endblock %}
+
+{% block content %}
+    <h2>Activity List</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Activity</th>
+                <th>Solution/Module</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for activity in activities %}
+            <tr>
+                <td>{{ activity.activity }}</td>
+                <td>{{ activity.get_solution_module_display }}</td>
+                <td>{{ activity.get_status_display }}</td>
+                <td>
+                    <a href="{% url 'activity-update' activity.pk %}" class="btn btn-sm btn-primary">Edit</a>
+                    <a href="{% url 'activity-delete' activity.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'activity-create' %}" class="btn btn-primary">Add Activity</a>
+{% endblock %}

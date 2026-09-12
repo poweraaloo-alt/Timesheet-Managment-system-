@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Project Details{% endblock %}
+
+{% block content %}
+    <h2>Project Details</h2>
+    <div class="card">
+        <div class="card-header">
+            Project: {{ project.project_name }}
+        </div>
+        <div class="card-body">
+            <p><strong>Customer:</strong> {{ project.customer }}</p>
+            <p><strong>Plant Code:</strong> {{ project.plant_code }}</p>
+            <p><strong>Plant Name:</strong> {{ project.plant_name }}</p>
+            <p><strong>Start Date:</strong> {{ project.start_date }}</p>
+            <p><strong>Tentative Completion Date:</strong> {{ project.tentative_completion_date }}</p>
+            <p><strong>Status:</strong> {{ project.get_status_display }}</p>
+            <!-- Add more project details as needed -->
+        </div>
+    </div>
+{% endblock %}
