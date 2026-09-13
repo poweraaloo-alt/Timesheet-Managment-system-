@@ -10,3 +10,4 @@ env/
 .vscode/
 .idea/
 staticfiles/
+db.sqlite3
